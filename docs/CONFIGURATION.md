@@ -1,60 +1,29 @@
-# Wise Words Configuration Reference Guide
+# Wise Words Single Configuration Guide
 
-The platform reads its runtime setup from a single `config.json` located at the repository root.
-
----
-
-## 1. Schema Structure (`config.schema.json`)
-
-The config file is validated on startup by `@wisewords/config-loader`.
-
-```json
-{
-  "engine": {
-    "port": 8080,
-    "host": "0.0.0.0",
-    "logLevel": "info",
-    "timeoutMs": 30000
-  },
-  "routing": {
-    "llm": {
-      "strategy": "round-robin",
-      "maxRetries": 3,
-      "circuitBreaker": {
-        "failureThreshold": 5,
-        "resetTimeoutMs": 30000,
-        "halfOpenTrials": 2
-      },
-      "fallbackChain": ["ollama-local"]
-    },
-    "search": {
-      "strategy": "round-robin",
-      "maxRetries": 3,
-      "fallbackChain": ["duckduckgo"],
-      "duckduckgoThrottleMs": 60000
-    }
-  },
-  "database": {
-    "host": "localhost",
-    "port": 5432,
-    "user": "postgres",
-    "password": "postgres",
-    "database": "llm_platform"
-  }
-}
-```
+The platform reads all runtime settings from `config.json` at the repository root.
 
 ---
 
-## 2. Environment Variables Overrides
+## 1. Schema Validation (`config.schema.json`)
 
-API keys should be passed through environment variables named in `config.json` (`apiKeyEnv`):
+On startup, `@wisewords/config-loader` parses and validates `config.json` against `config.schema.json`.
 
-| Provider | Environment Variable |
-|---|---|
-| Google AI Studio | `GOOGLE_AI_STUDIO_API_KEY` |
-| Groq | `GROQ_API_KEY` |
-| OpenAI | `OPENAI_API_KEY` |
-| Anthropic | `ANTHROPIC_API_KEY` |
-| Google CSE | `GOOGLE_CSE_API_KEY` |
-| Tavily | `TAVILY_API_KEY` |
+Top-level sections:
+- `engine`: port (default 8080), host, logLevel, timeoutMs
+- `routing`: strategy (`round-robin`), maxRetries, circuitBreaker parameters, fallbackChain
+- `database`: PostgreSQL connection settings
+- `llm`: `free` and `paid` provider dictionaries
+- `search`: `free` and `paid` provider dictionaries
+- `rag`: enabled flag, embedding provider, vector store
+- `mcp`: enabled flag, servers array
+
+---
+
+## 2. Environment Variables
+
+API keys are injected via environment variables matching `apiKeyEnv` in `config.json`:
+- `GOOGLE_AI_STUDIO_API_KEY`
+- `GROQ_API_KEY`
+- `OPENAI_API_KEY`
+- `ANTHROPIC_API_KEY`
+- `TAVILY_API_KEY`

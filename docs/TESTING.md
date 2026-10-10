@@ -1,51 +1,32 @@
-# Wise Words Comprehensive Testing Guide (Bun & Jest)
+# Wise Words Test Execution Guide
 
-This guide details executing test suites across all monorepo packages using **Bun Test** or **Jest**.
+All test suites use Jest or Bun test runners.
 
 ---
 
-## 1. Running Monorepo Tests with Bun
-
-Bun includes a ultra-fast native test runner that supports TypeScript out of the box without compilation steps.
+## 1. Single Command Test Run (Entire Monorepo)
 
 ```bash
-# Run all tests across the monorepo with Bun
+# Run all workspace test suites
+npx jest
+# OR using Bun:
 bun test
-
-# Run tests for all shared libraries
-bun test backend/shared/
-
-# Run tests for specific shared module
-bun test backend/shared/config-loader/
-bun test backend/shared/circuit-breaker/
-bun test backend/shared/rate-limiter/
-
-# Run tests for LLM microservices
-bun test backend/llm-services/
-bun test backend/llm-services/google-ai-studio/
-bun test backend/llm-services/groq/
-
-# Run tests for Search microservices
-bun test backend/search-services/
-bun test backend/search-services/google-cse/
-
-# Run tests for Orchestration Routers
-bun test backend/orchestration/
-
-# Run tests for API Gateway
-bun test backend/gateway/wisewords-engine/
 ```
 
 ---
 
-## 2. Running Monorepo Tests with Node.js & Jest
+## 2. Package-by-Package Test Execution
 
 ```bash
-# Run all tests with Jest
-npx jest
+# Shared Packages
+npx jest backend/shared/config-loader/
+npx jest backend/shared/circuit-breaker/
+npx jest backend/shared/rate-limiter/
 
-# Run tests for specific directory
-npx jest backend/shared/
+# Orchestration & Gateway
 npx jest backend/orchestration/
 npx jest backend/gateway/wisewords-engine/
+
+# Extensions
+npx jest backend/extensions/
 ```
