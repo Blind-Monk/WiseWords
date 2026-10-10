@@ -1,78 +1,42 @@
-# Wise Words Step-by-Step Production Deployment Command Guide
+# Wise Words Production Deployment Guide (Bun & Docker)
 
-This guide provides step-by-step commands for deploying Wise Words using Docker, Docker Compose, or standalone Node.js environments.
+This guide describes step-by-step production deployment using **Bun** and **Docker Compose**.
 
 ---
 
-## 1. Docker Compose Deployment (Recommended)
+## 1. Bun Production Launch Commands
 
-### Step 1: Prepare Production Configuration
-Create `config.json` at repo root (`/app/config.json` inside container):
+### Step 1: Set Central Config Path & Environment Variables
+- Primary Configuration File: `config.json` (Repository Root)
 ```bash
 cp config.example.json config.json
+export WISE_WORDS_CONFIG="$(pwd)/config.json"
+export GROQ_API_KEY="your-groq-key"
+export GOOGLE_AI_STUDIO_API_KEY="your-google-key"
 ```
 
-### Step 2: Set Environment Secrets
-Export API keys into your terminal or `.env` file:
+### Step 2: Install Production Dependencies with Bun
 ```bash
-export GROQ_API_KEY="your-groq-api-key"
-export GOOGLE_AI_STUDIO_API_KEY="your-google-ai-key"
-export OPENAI_API_KEY="your-openai-api-key"
-export ANTHROPIC_API_KEY="your-anthropic-key"
+bun install --production
 ```
 
-### Step 3: Launch Containers in Background
-Run `docker-compose` to build images and spawn PostgreSQL, Ollama, and Gateway:
+### Step 3: Start Gateway Service via Bun
+Entrypoint File Path: `backend/gateway/wisewords-engine/src/index.ts`
+```bash
+bun run backend/gateway/wisewords-engine/src/index.ts
+```
+
+---
+
+## 2. Docker & Docker Compose Deployment
+
+### Step 1: Multi-Container Stack Launch
+File Path: `docker-compose.yml` (Repository Root)
 ```bash
 docker-compose up -d --build
 ```
 
-### Step 4: Verify Running Services
+### Step 2: Health Check
 ```bash
-# List container health
-docker-compose ps
-
-# Output:
-# Name                 Command                  State    Ports
-# wisewords-engine     npm run dev              Up       0.0.0.0:8080->8080/tcp
-# wisewords-postgres   docker-entrypoint.sh     Up       0.0.0.0:5432->5432/tcp
-# wisewords-ollama     /bin/ollama serve        Up       0.0.0.0:11434->11434/tcp
-```
-
-### Step 5: Test Endpoint Health
-```bash
-curl -X GET http://localhost:8080/v1/health
-# Response: {"status":"ok","service":"wisewords-engine"}
-```
-
----
-
-## 2. Standalone Docker Image Build & Run Commands
-
-If you wish to run only the API Gateway container separately:
-
-```bash
-# Build standalone Docker image
-docker build -t wisewords-engine:1.0.0 .
-
-# Run container binding port 8080 and mounting config.json
-docker run -d \
-  --name wisewords-gateway \
-  -p 8080:8080 \
-  -v $(pwd)/config.json:/app/config.json \
-  -e PORT=8080 \
-  -e GROQ_API_KEY="your-key" \
-  wisewords-engine:1.0.0
-```
-
----
-
-## 3. Stopping and Cleaning Container Resources
-
-```bash
-# Stop and remove containers
-docker-compose down
-
-# Stop, remove containers, and purge PostgreSQL / Ollama data volumes
-docker-compose down -v
+curl http://localhost:8080/v1/health
 ```

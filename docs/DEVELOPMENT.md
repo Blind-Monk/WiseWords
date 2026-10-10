@@ -1,116 +1,111 @@
-# Wise Words Detailed Local Development & Command Guide
+# Wise Words Development Guide (Bun & Node.js Support)
 
-This step-by-step guide walks through developing and running every individual service and package in the Wise Words repository.
+This step-by-step guide details how to develop, test, and run every microservice and package in Wise Words using either **Bun** or **Node.js/npm**.
 
 ---
 
-## 1. Prerequisites & System Installation
+## 1. Environment Prerequisites
 
-Ensure the following tools are installed on your machine:
+You can use either **Bun** (recommended for speed) or **Node.js/npm**:
+- **Bun:** v1.1.0 or higher (`bun -v`)
 - **Node.js:** v20.x or higher (`node -v`)
-- **npm:** v10.x or higher (`npm -v`)
-- **Docker & Docker Compose:** Optional for containerized deployment (`docker -v`)
 
 ---
 
-## 2. Step-by-Step Monorepo Setup
+## 2. Monorepo Setup Commands
 
-### Step 1: Clone & Navigate to Repository
+### Step 1: Install Workspace Dependencies
 ```bash
-git clone https://github.com/your-org/wisewords.git
-cd wisewords
-```
+# Using Bun (Fastest)
+bun install
 
-### Step 2: Install Workspace Dependencies
-Execute from root directory to install packages for all npm workspaces:
-```bash
+# Using Node.js/npm
 npm install
 ```
 
-### Step 3: Configure Runtime Configuration
-Copy reference template `config.example.json` to primary config file `config.json`:
+### Step 2: Configure Central Runtime File
+- File Path: `config.json` (Repository Root)
 ```bash
 cp config.example.json config.json
 ```
-Edit `config.json` if necessary to configure port, log level, timeouts, or provider enablement.
 
-### Step 4: Build TypeScript Workspaces
-Build all TypeScript source files into `dist/`:
+### Step 3: Build Monorepo Workspaces
 ```bash
+# Using Bun
+bun run build
+
+# Using Node.js/npm
 npm run build
 ```
 
 ---
 
-## 3. Running Services Individually in Development Mode
+## 3. Running Services in Development Mode with Bun & Node.js
 
-### 3.1 Running the API Gateway Microservice
+### 3.1 Running the Main Gateway (`backend/gateway/wisewords-engine/src/index.ts`)
+
 ```bash
-# Option A: From root directory
-npm run dev
+# Using Bun (Instant TS Execution without build)
+bun run backend/gateway/wisewords-engine/src/index.ts
 
-# Option B: Navigate directly to wisewords-engine package
-cd backend/gateway/wisewords-engine
+# Or using npm workspace script
 npm run dev
 ```
-The API Gateway server starts on port `8080` (or `PORT` environment variable).
 
 ---
 
-### 3.2 Testing & Building Individual Microservices One-by-One
+### 3.2 Running & Testing Individual Microservices One-by-One
 
 #### Shared Packages (`backend/shared/`)
-```bash
-# Build & Test config-loader
-npm run build --workspace=@wisewords/config-loader
-npx jest backend/shared/config-loader/
+- **Config Loader:** `backend/shared/config-loader/src/index.ts`
+  ```bash
+  bun test backend/shared/config-loader/
+  # or: npx jest backend/shared/config-loader/
+  ```
 
-# Build & Test circuit-breaker
-npm run build --workspace=@wisewords/circuit-breaker
-npx jest backend/shared/circuit-breaker/
+- **Circuit Breaker:** `backend/shared/circuit-breaker/src/index.ts`
+  ```bash
+  bun test backend/shared/circuit-breaker/
+  # or: npx jest backend/shared/circuit-breaker/
+  ```
 
-# Build & Test rate-limiter
-npm run build --workspace=@wisewords/rate-limiter
-npx jest backend/shared/rate-limiter/
-```
+- **Rate Limiter:** `backend/shared/rate-limiter/src/index.ts`
+  ```bash
+  bun test backend/shared/rate-limiter/
+  # or: npx jest backend/shared/rate-limiter/
+  ```
 
 #### LLM Microservices (`backend/llm-services/`)
-```bash
-# Google AI Studio Service
-npm run build --workspace=@wisewords/service-google-ai-studio
-npx jest backend/llm-services/google-ai-studio/
+- **Google AI Studio:** `backend/llm-services/google-ai-studio/src/index.ts`
+  ```bash
+  bun test backend/llm-services/google-ai-studio/
+  ```
 
-# Groq Service
-npm run build --workspace=@wisewords/service-groq
-npx jest backend/llm-services/groq/
+- **Groq:** `backend/llm-services/groq/src/index.ts`
+  ```bash
+  bun test backend/llm-services/groq/
+  ```
 
-# OpenAI Service
-npm run build --workspace=@wisewords/service-openai
-npx jest backend/llm-services/openai/
-```
+- **OpenAI:** `backend/llm-services/openai/src/index.ts`
+  ```bash
+  bun test backend/llm-services/openai/
+  ```
 
 #### Search Microservices (`backend/search-services/`)
-```bash
-# Google CSE Search Service
-npm run build --workspace=@wisewords/service-google-cse
-npx jest backend/search-services/google-cse/
-
-# Tavily Free Search Service
-npm run build --workspace=@wisewords/service-tavily-free
-npx jest backend/search-services/tavily-free/
-```
+- **Google CSE Search:** `backend/search-services/google-cse/src/index.ts`
+  ```bash
+  bun test backend/search-services/google-cse/
+  ```
 
 ---
 
-## 4. Serving the Frontend Web Interface
-
-To serve the web UI on port `4200`:
+## 4. Serving the Web Frontend (`frontend/src/index.html`)
 
 ```bash
-# Option 1: Serve directly with static server
-npx serve frontend/src -p 4200
+# Using Bun to serve static frontend on port 4200
+bun run --hot serve frontend/src --port 4200
 
-# Option 2: Open directly in browser
-# Open file path: frontend/src/index.html
+# Or using npx
+npx serve frontend/src -p 4200
 ```
-Navigate to `http://localhost:4200` to interact with the Wise Words gateway interface.
+Access the application at `http://localhost:4200`.
