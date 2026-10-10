@@ -1,10 +1,27 @@
-# Wise Words RAG & MCP Integration
+# Wise Words RAG & MCP Extensions Guide
 
-## RAG Service (`backend/extensions/rag-service`)
-- Text chunking with custom sizes and overlaps.
-- Integrated vector embeddings via `ollama-local` or custom embedders.
-- `pgvector` schema supported out-of-the-box.
+The platform includes modular extensions for Retrieval-Augmented Generation (RAG) and Model Context Protocol (MCP) tool integration.
 
-## MCP Service (`backend/extensions/mcp-service`)
-- Pluggable Model Context Protocol server client adapter.
-- Tool discovery (`listTools()`) and execution (`invokeTool()`).
+---
+
+## 1. RAG Service (`backend/extensions/rag-service`)
+
+### 1.1 Step-by-Step Execution
+1. **Document Ingestion & Chunking:**
+   Call `addDocument(collection, docId, text)` to split raw text into configured chunk sizes with overlap (`chunkSize: 500`, `chunkOverlap: 50`).
+2. **Embedding Generation:**
+   Generates dense vector representations (1536 dimensions) using configured embedding models (e.g. `ollama-local`).
+3. **Retrieval:**
+   Call `retrieve(query, collection, topK)` to fetch top matching text chunks to assemble into LLM prompt context.
+
+---
+
+## 2. MCP Service (`backend/extensions/mcp-service`)
+
+### 2.1 Step-by-Step Execution
+1. **Tool Discovery:**
+   `listTools()` retrieves active Model Context Protocol tools declared in `config.mcp.servers`.
+2. **Gateway Injection:**
+   The gateway includes tool definitions in LLM requests.
+3. **Tool Execution:**
+   Call `invokeTool(name, args)` to execute standard MCP tool calls and return results back to the LLM.
