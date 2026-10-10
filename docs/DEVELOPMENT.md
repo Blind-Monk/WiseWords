@@ -4,25 +4,34 @@ This document provides explicit step-by-step setup, build, test, and dev command
 
 ---
 
-## 1. Monorepo Root Setup Commands
+## 1. Single Command Monorepo Root Installation
+
+Because Wise Words is configured as a native monorepo workspace (declared in root `package.json`), you **do not need to enter individual directories to install dependencies**.
+
+Running a single command at the repository root automatically installs and links dependencies across **all 30 LLM microservices, 17 Search services, 9 shared libraries, extension modules, API gateway, and frontend**:
 
 ```bash
-# Clone Repository
+# SINGLE COMMAND: Install all packages and services across the entire monorepo
+bun install
+
+# OR using npm:
+npm install
+```
+
+### Full Root Setup Sequence:
+```bash
+# Step 1: Clone Repository
 git clone https://github.com/your-org/wisewords.git
 cd wisewords
 
-# Install All Dependencies for Monorepo Workspaces
+# Step 2: SINGLE COMMAND Installation for ALL packages and services
 bun install
-# OR using npm:
-npm install
 
-# Initialize Central Configuration
+# Step 3: Initialize Central Configuration
 cp config.example.json config.json
 
-# Build All Backend Workspace Packages
+# Step 4: SINGLE COMMAND Build for ALL packages and services
 bun run build
-# OR using npm:
-npm run build
 ```
 
 ---
