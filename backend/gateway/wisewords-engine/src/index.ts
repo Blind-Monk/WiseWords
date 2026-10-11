@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { loadConfig } from '@wisewords/config-loader';
+import { loadConfig, getProviderConfig } from '@wisewords/config-loader';
 import { LlmRouter } from '@wisewords/llm-router';
 import { SearchRouter } from '@wisewords/search-router';
 import { RagService } from '@wisewords/rag-service';
@@ -41,6 +41,7 @@ export function createApp() {
   });
 
   const config = loadConfig();
+  const ollamaConfig = getProviderConfig('llm', 'free', 'ollama-local');
 
   // Instantiate LLM providers
   const freeLlm = [
@@ -56,7 +57,13 @@ export function createApp() {
     new Provider_requesty()
   ];
   const paidLlm = [new Provider_openai(), new Provider_anthropic()];
-  const ollama = new Provider_ollama_local();
+
+  // Dynamic Ollama local initialization
+  const ollama = new Provider_ollama_local({
+    baseUrl: ollamaConfig?.baseUrl,
+    defaultModel: ollamaConfig?.defaultModel,
+    models: ollamaConfig?.models
+  });
 
   const llmRouter = new LlmRouter(freeLlm, paidLlm, ollama);
 
@@ -80,7 +87,8 @@ export function createApp() {
     res.json({
       llm: {
         free: freeLlm.map((p) => ({ name: p.name, models: p.models })),
-        paid: paidLlm.map((p) => ({ name: p.name, models: p.models }))
+        paid: paidLlm.map((p) => ({ name: p.name, models: p.models })),
+        fallback: { name: ollama.name, baseUrl: ollama.baseUrl, defaultModel: ollama.defaultModel, models: ollama.models }
       },
       search: {
         free: freeSearch.map((p) => ({ name: p.name })),
