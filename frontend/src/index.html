@@ -6,124 +6,692 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
-    .container { max-width: 900px; margin: 0 auto; background: #1e293b; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5); }
-    h1 { margin-top: 0; color: #38bdf8; display: flex; align-items: center; gap: 10px; }
-    .form-group { margin-bottom: 16px; }
-    label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; color: #94a3b8; }
-    input[type="text"], textarea, select { width: 100%; box-sizing: border-box; padding: 10px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 6px; font-size: 14px; }
-    textarea { height: 100px; resize: vertical; }
-    .row { display: flex; gap: 16px; }
-    .col { flex: 1; }
-    button { background: #0284c7; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; }
-    button:hover { background: #0369a1; }
-    .card { background: #0f172a; border: 1px solid #334155; padding: 16px; border-radius: 8px; margin-top: 20px; }
-    .badge { display: inline-block; padding: 4px 8px; background: #0284c7; border-radius: 4px; font-size: 12px; font-weight: bold; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: #1e293b;
+      border-right: 1px solid #334155;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      flex-shrink: 0;
+    }
+    .brand {
+      font-size: 18px;
+      font-weight: bold;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .new-chat-btn {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .new-chat-btn:hover { background: #0369a1; }
+
+    .history-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+      margin: 20px 0 10px 0;
+      letter-spacing: 0.5px;
+    }
+    .history-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .history-item {
+      padding: 10px;
+      border-radius: 6px;
+      background: #0f172a;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: #cbd5e1;
+      transition: all 0.2s;
+    }
+    .history-item:hover, .history-item.active {
+      background: #334155;
+      border-color: #38bdf8;
+      color: #fff;
+    }
+    .history-item-text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      margin-right: 8px;
+    }
+    .delete-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .delete-btn:hover { color: #f87171; background: #475569; }
+
+    .sidebar-footer {
+      padding-top: 12px;
+      border-top: 1px solid #334155;
+      margin-top: 10px;
+    }
+    .clear-history-btn {
+      width: 100%;
+      background: #334155;
+      color: #94a3b8;
+      border: none;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .clear-history-btn:hover { background: #475569; color: #fff; }
+
+    /* Main Chat Panel */
+    .main-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      background: #0f172a;
+    }
+
+    /* Header controls */
+    .header-bar {
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .control-group label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+    select, input[type="text"] {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #f8fafc;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+    }
+    select:focus { border-color: #38bdf8; }
+
+    .toggle-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      font-size: 13px;
+      color: #cbd5e1;
+      cursor: pointer;
+    }
+    .toggle-group input { cursor: pointer; }
+
+    /* Messages container */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .message-row {
+      display: flex;
+      gap: 12px;
+      max-width: 85%;
+    }
+    .message-row.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+    .message-row.assistant {
+      align-self: flex-start;
+    }
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #0284c7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .message-row.user .avatar { background: #475569; }
+    .bubble {
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 12px 16px;
+      border-radius: 12px;
+      line-height: 1.5;
+      font-size: 14px;
+      color: #f1f5f9;
+      white-space: pre-wrap;
+    }
+    .message-row.user .bubble {
+      background: #0284c7;
+      border-color: #0369a1;
+      color: #ffffff;
+    }
+    .meta-tag {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 6px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      background: #0369a1;
+      color: #fff;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: bold;
+    }
     .fallback-badge { background: #eab308; color: #000; }
-    .error { background: #7f1d1d; border: 1px solid #b91c1c; padding: 12px; border-radius: 6px; color: #fca5a5; margin-top: 16px; }
-    .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
-    .checkbox-group input { width: auto; }
+
+    .search-card {
+      margin-top: 10px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 12px;
+    }
+    .search-card-title {
+      font-weight: bold;
+      color: #38bdf8;
+      margin-bottom: 6px;
+    }
+
+    /* Bottom Query Box */
+    .chat-input-area {
+      padding: 16px 24px;
+      background: #1e293b;
+      border-top: 1px solid #334155;
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+    textarea {
+      flex: 1;
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      resize: none;
+      height: 60px;
+      outline: none;
+      font-family: inherit;
+    }
+    textarea:focus { border-color: #38bdf8; }
+    .send-btn {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      height: 60px;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .send-btn:hover { background: #0369a1; }
+
+    .error-toast {
+      background: #7f1d1d;
+      border: 1px solid #b91c1c;
+      color: #fca5a5;
+      padding: 10px 16px;
+      border-radius: 6px;
+      margin: 10px 24px 0 24px;
+      font-size: 13px;
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1><span>💡</span> Wise Words Meta-AI Gateway</h1>
 
-    <div class="form-group">
-      <label for="prompt">Prompt Query</label>
-      <textarea id="prompt" placeholder="Ask anything..."></textarea>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="brand">
+      <span>💡</span> Wise Words Gateway
     </div>
+    <button class="new-chat-btn" onclick="createNewChat()">
+      <span>➕</span> New Chat
+    </button>
 
-    <div class="row">
-      <div class="col form-group">
-        <label for="llmType">LLM Type</label>
-        <select id="llmType" onchange="toggleLlmProvider()">
-          <option value="free" selected>Free (Auto Round-Robin)</option>
-          <option value="paid">Paid (Explicit Provider)</option>
+    <div class="history-title">Chat History</div>
+    <div class="history-list" id="historyList"></div>
+
+    <div class="sidebar-footer">
+      <button class="clear-history-btn" onclick="clearAllChats()">Clear History</button>
+    </div>
+  </div>
+
+  <!-- Main Chat Panel -->
+  <div class="main-panel">
+    <!-- Header Bar with Dynamic Provider & Model Pickers -->
+    <div class="header-bar">
+      <!-- LLM Type / Provider / Model -->
+      <div class="control-group">
+        <label for="llmCategory">LLM Mode</label>
+        <select id="llmCategory" onchange="onLlmCategoryChange()">
+          <option value="free" selected>Free LLM</option>
+          <option value="paid">Paid LLM</option>
+          <option value="fallback">Fallback (Ollama Local)</option>
         </select>
       </div>
 
-      <div class="col form-group" id="llmProviderGroup" style="display: none;">
-        <label for="llmProvider">Paid LLM Provider</label>
-        <select id="llmProvider">
-          <option value="openai">OpenAI</option>
-          <option value="anthropic">Anthropic</option>
-          <option value="groq-paid">Groq Paid</option>
+      <div class="control-group">
+        <label for="llmProvider">LLM Provider</label>
+        <select id="llmProvider" onchange="onLlmProviderChange()"></select>
+      </div>
+
+      <div class="control-group">
+        <label for="llmModel">LLM Model</label>
+        <select id="llmModel"></select>
+      </div>
+
+      <!-- Search API Controls -->
+      <div class="toggle-group">
+        <input type="checkbox" id="searchEnable" onchange="toggleSearchControls()">
+        <label for="searchEnable" style="cursor:pointer; margin:0;">Enable Grounding Search</label>
+      </div>
+
+      <div class="control-group" id="searchTypeGroup" style="display:none;">
+        <label for="searchType">Search Type</label>
+        <select id="searchType" onchange="onSearchTypeChange()">
+          <option value="free" selected>Free Search</option>
+          <option value="paid">Paid Search</option>
         </select>
       </div>
 
-      <div class="col form-group" id="llmModelGroup" style="display: none;">
-        <label for="llmModel">Model Name</label>
-        <input type="text" id="llmModel" placeholder="e.g. gpt-4o or claude-3-5-sonnet">
+      <div class="control-group" id="searchProviderGroup" style="display:none;">
+        <label for="searchProvider">Search API</label>
+        <select id="searchProvider"></select>
       </div>
     </div>
 
-    <div class="checkbox-group">
-      <input type="checkbox" id="search">
-      <label for="search" style="margin:0;">Enable Grounding Search</label>
-    </div>
+    <div id="errorToast" class="error-toast"></div>
 
-    <div style="margin-top: 20px;">
-      <button onclick="submitQuery()">Send Query</button>
-    </div>
+    <!-- Chat Messages -->
+    <div class="chat-messages" id="chatMessages"></div>
 
-    <div id="errorBox" class="error" style="display: none;"></div>
-
-    <div id="responseCard" class="card" style="display: none;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <span class="badge" id="providerBadge">Provider</span>
-        <span id="fallbackBadge" class="badge fallback-badge" style="display: none;">Fallback Used</span>
-      </div>
-      <div id="responseContent" style="white-space: pre-wrap; line-height: 1.5;"></div>
-      <div id="metadata" style="margin-top: 12px; font-size: 12px; color: #64748b;"></div>
+    <!-- Chat Input Box -->
+    <div class="chat-input-area">
+      <textarea id="promptInput" placeholder="Ask anything... (Press Enter to send, Shift+Enter for newline)" onkeydown="handleKeyDown(event)"></textarea>
+      <button class="send-btn" onclick="sendQuery()">Send</button>
     </div>
   </div>
 
   <script>
-    function toggleLlmProvider() {
-      const type = document.getElementById('llmType').value;
-      const providerGroup = document.getElementById('llmProviderGroup');
-      const modelGroup = document.getElementById('llmModelGroup');
-      if (type === 'paid') {
-        providerGroup.style.display = 'block';
-        modelGroup.style.display = 'block';
+    const API_BASE = 'http://localhost:8080';
+    let llmList = { free: [], paid: [], fallback: null };
+    let searchList = { free: [], paid: [], fallback: null };
+
+    let chatSessions = []; // array of { id, title, messages: [] }
+    let currentSessionId = null;
+
+    // Load data on start
+    window.addEventListener('DOMContentLoaded', async () => {
+      loadHistoryFromStorage();
+      await fetchLlmProviders();
+      await fetchSearchApis();
+
+      if (!currentSessionId) {
+        createNewChat();
       } else {
-        providerGroup.style.display = 'none';
-        modelGroup.style.display = 'none';
+        renderMessages();
+      }
+    });
+
+    // 1. Fetch LLM Providers & Models using single API: /api/v1/list/llm
+    async function fetchLlmProviders() {
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/list/llm`);
+        if (res.ok) {
+          llmList = await res.json();
+          onLlmCategoryChange();
+        } else {
+          showError('Failed to fetch LLM list from gateway');
+        }
+      } catch (err) {
+        showError('Cannot connect to gateway endpoint /api/v1/list/llm');
       }
     }
 
-    async function submitQuery() {
-      const prompt = document.getElementById('prompt').value;
-      const llmType = document.getElementById('llmType').value;
-      const llmProvider = document.getElementById('llmProvider').value;
-      const llmModel = document.getElementById('llmModel').value;
-      const search = document.getElementById('search').checked;
+    // 2. Fetch Search APIs using single API: /api/v1/list/searchapi
+    async function fetchSearchApis() {
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/list/searchapi`);
+        if (res.ok) {
+          searchList = await res.json();
+          onSearchTypeChange();
+        } else {
+          showError('Failed to fetch Search API list from gateway');
+        }
+      } catch (err) {
+        showError('Cannot connect to gateway endpoint /api/v1/list/searchapi');
+      }
+    }
 
-      const errBox = document.getElementById('errorBox');
-      const card = document.getElementById('responseCard');
-      errBox.style.display = 'none';
-      card.style.display = 'none';
+    // Dynamic dropdown updates for LLM
+    function onLlmCategoryChange() {
+      const cat = document.getElementById('llmCategory').value;
+      const providerSelect = document.getElementById('llmProvider');
+      providerSelect.innerHTML = '';
 
-      if (!prompt) {
-        errBox.innerText = 'Please enter a prompt query.';
-        errBox.style.display = 'block';
+      let providers = [];
+      if (cat === 'free') {
+        providers = llmList.free || [];
+      } else if (cat === 'paid') {
+        providers = llmList.paid || [];
+      } else if (cat === 'fallback') {
+        if (llmList.fallback) providers = [llmList.fallback];
+      }
+
+      providers.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.name;
+        opt.textContent = p.name;
+        providerSelect.appendChild(opt);
+      });
+
+      onLlmProviderChange();
+    }
+
+    function onLlmProviderChange() {
+      const cat = document.getElementById('llmCategory').value;
+      const providerName = document.getElementById('llmProvider').value;
+      const modelSelect = document.getElementById('llmModel');
+      modelSelect.innerHTML = '';
+
+      let providers = [];
+      if (cat === 'free') providers = llmList.free || [];
+      else if (cat === 'paid') providers = llmList.paid || [];
+      else if (cat === 'fallback' && llmList.fallback) providers = [llmList.fallback];
+
+      const found = providers.find(p => p.name === providerName);
+      const models = found && found.models && found.models.length > 0 ? found.models : ['default'];
+
+      models.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        modelSelect.appendChild(opt);
+      });
+    }
+
+    // Dynamic Search Controls
+    function toggleSearchControls() {
+      const enabled = document.getElementById('searchEnable').checked;
+      document.getElementById('searchTypeGroup').style.display = enabled ? 'flex' : 'none';
+      document.getElementById('searchProviderGroup').style.display = enabled ? 'flex' : 'none';
+    }
+
+    function onSearchTypeChange() {
+      const stype = document.getElementById('searchType').value;
+      const providerSelect = document.getElementById('searchProvider');
+      providerSelect.innerHTML = '';
+
+      let apis = [];
+      if (stype === 'paid') {
+        apis = searchList.paid || [];
+      } else {
+        apis = searchList.free || [];
+      }
+
+      if (apis.length === 0 && searchList.fallback) {
+        apis = [searchList.fallback];
+      }
+
+      apis.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.name;
+        opt.textContent = s.name;
+        providerSelect.appendChild(opt);
+      });
+    }
+
+    // Chat History Management
+    function loadHistoryFromStorage() {
+      try {
+        const stored = localStorage.getItem('wisewords_chat_history');
+        if (stored) {
+          chatSessions = JSON.parse(stored);
+          if (chatSessions.length > 0) {
+            currentSessionId = chatSessions[0].id;
+          }
+        }
+      } catch (e) {
+        chatSessions = [];
+      }
+      renderHistoryList();
+    }
+
+    function saveHistoryToStorage() {
+      try {
+        localStorage.setItem('wisewords_chat_history', JSON.stringify(chatSessions));
+      } catch (e) {}
+      renderHistoryList();
+    }
+
+    function createNewChat() {
+      const newSession = {
+        id: 'chat_' + Date.now(),
+        title: 'New Chat',
+        messages: []
+      };
+      chatSessions.unshift(newSession);
+      currentSessionId = newSession.id;
+      saveHistoryToStorage();
+      renderMessages();
+    }
+
+    function switchSession(id) {
+      currentSessionId = id;
+      renderHistoryList();
+      renderMessages();
+    }
+
+    function deleteSession(id, event) {
+      event.stopPropagation();
+      chatSessions = chatSessions.filter(s => s.id !== id);
+      if (currentSessionId === id) {
+        currentSessionId = chatSessions.length > 0 ? chatSessions[0].id : null;
+      }
+      saveHistoryToStorage();
+      if (!currentSessionId) createNewChat();
+      else renderMessages();
+    }
+
+    function clearAllChats() {
+      chatSessions = [];
+      currentSessionId = null;
+      saveHistoryToStorage();
+      createNewChat();
+    }
+
+    function renderHistoryList() {
+      const container = document.getElementById('historyList');
+      container.innerHTML = '';
+
+      chatSessions.forEach(session => {
+        const item = document.createElement('div');
+        item.className = 'history-item' + (session.id === currentSessionId ? ' active' : '');
+        item.onclick = () => switchSession(session.id);
+
+        const text = document.createElement('div');
+        text.className = 'history-item-text';
+        text.textContent = session.title || 'Untitled Chat';
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'delete-btn';
+        delBtn.innerHTML = '🗑';
+        delBtn.onclick = (e) => deleteSession(session.id, e);
+
+        item.appendChild(text);
+        item.appendChild(delBtn);
+        container.appendChild(item);
+      });
+    }
+
+    function renderMessages() {
+      const container = document.getElementById('chatMessages');
+      container.innerHTML = '';
+
+      const session = chatSessions.find(s => s.id === currentSessionId);
+      if (!session || !session.messages || session.messages.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: #64748b; margin-top: 40px; font-size: 14px;">Select provider and model above and send a query to begin.</div>`;
         return;
       }
 
-      const payload = {
-        prompt,
-        llmType,
-        search
-      };
+      session.messages.forEach(msg => {
+        const row = document.createElement('div');
+        row.className = 'message-row ' + msg.role;
 
-      if (llmType === 'paid') {
-        payload.llmProvider = llmProvider;
-        payload.llmModel = llmModel;
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        avatar.textContent = msg.role === 'user' ? 'U' : 'AI';
+
+        const contentWrapper = document.createElement('div');
+
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.textContent = msg.content;
+        contentWrapper.appendChild(bubble);
+
+        if (msg.role === 'assistant') {
+          const meta = document.createElement('div');
+          meta.className = 'meta-tag';
+          meta.innerHTML = `<span class="badge">${msg.provider || 'Provider'} (${msg.model || 'model'})</span>` +
+            (msg.fallback ? `<span class="badge fallback-badge">Fallback Used</span>` : '') +
+            `<span>Latency: ${msg.latencyMs || 0}ms</span>` +
+            `<span>Tokens: ${msg.tokensUsed?.totalTokens || 0}</span>`;
+          contentWrapper.appendChild(meta);
+
+          if (msg.context && msg.context.search && msg.context.search.results) {
+            const searchCard = document.createElement('div');
+            searchCard.className = 'search-card';
+            searchCard.innerHTML = `<div class="search-card-title">🔍 Grounding Search Results (${msg.context.search.provider})</div>` +
+              msg.context.search.results.map(r => `<div><strong>${r.title}</strong>: ${r.snippet}</div>`).join('');
+            contentWrapper.appendChild(searchCard);
+          }
+        }
+
+        row.appendChild(avatar);
+        row.appendChild(contentWrapper);
+        container.appendChild(row);
+      });
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendQuery();
+      }
+    }
+
+    async function sendQuery() {
+      hideError();
+      const input = document.getElementById('promptInput');
+      const prompt = input.value.trim();
+      if (!prompt) return;
+
+      const llmCategory = document.getElementById('llmCategory').value;
+      const llmProvider = document.getElementById('llmProvider').value;
+      const llmModel = document.getElementById('llmModel').value;
+
+      const searchEnable = document.getElementById('searchEnable').checked;
+      const searchType = document.getElementById('searchType').value;
+      const searchProvider = document.getElementById('searchProvider').value;
+
+      const session = chatSessions.find(s => s.id === currentSessionId);
+      if (!session) return;
+
+      // Update session title if first message
+      if (session.messages.length === 0) {
+        session.title = prompt.length > 25 ? prompt.substring(0, 25) + '...' : prompt;
       }
 
+      // Append user message
+      session.messages.push({ role: 'user', content: prompt });
+      input.value = '';
+      renderMessages();
+      saveHistoryToStorage();
+
+      // Build payload
+      const payload = {
+        prompt,
+        llmType: llmCategory === 'fallback' ? 'free' : llmCategory,
+        llmProvider,
+        llmModel,
+        search: searchEnable,
+        searchType,
+        searchProvider
+      };
+
       try {
-        const res = await fetch('http://localhost:8080/v1/query', {
+        const res = await fetch(`${API_BASE}/v1/query`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -131,27 +699,37 @@
 
         const data = await res.json();
         if (!res.ok) {
-          errBox.innerText = data.error || 'Request failed';
-          errBox.style.display = 'block';
+          showError(data.error || 'Query failed');
           return;
         }
 
-        document.getElementById('providerBadge').innerText = `${data.provider} (${data.model})`;
-        document.getElementById('responseContent').innerText = data.content;
-        document.getElementById('metadata').innerText = `Latency: ${data.latencyMs}ms | Tokens: ${data.tokensUsed?.totalTokens || 0}`;
+        session.messages.push({
+          role: 'assistant',
+          content: data.content,
+          provider: data.provider,
+          model: data.model,
+          latencyMs: data.latencyMs,
+          fallback: data.fallback,
+          tokensUsed: data.tokensUsed,
+          context: data.context
+        });
 
-        const fallbackBadge = document.getElementById('fallbackBadge');
-        if (data.fallback) {
-          fallbackBadge.style.display = 'inline-block';
-        } else {
-          fallbackBadge.style.display = 'none';
-        }
-
-        card.style.display = 'block';
+        renderMessages();
+        saveHistoryToStorage();
       } catch (err) {
-        errBox.innerText = 'Failed to connect to WiseWords Gateway backend.';
-        errBox.style.display = 'block';
+        showError('Failed to send query to WiseWords backend gateway.');
       }
+    }
+
+    function showError(msg) {
+      const toast = document.getElementById('errorToast');
+      toast.innerText = msg;
+      toast.style.display = 'block';
+    }
+
+    function hideError() {
+      const toast = document.getElementById('errorToast');
+      toast.style.display = 'none';
     }
   </script>
 </body>
