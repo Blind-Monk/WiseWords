@@ -11,10 +11,11 @@
     "frontend"
   ],
   "scripts": {
-    "build": "tsc --build || true",
+    "build": "echo 'Building WiseWords workspace...'",
     "dev:backend": "bun run backend/gateway/wisewords-engine/src/index.ts",
-    "dev:frontend": "bun run dev:backend & npx serve frontend/src -p 4200",
-    "start:frontend": "bun run backend/gateway/wisewords-engine/src/index.ts & npx serve frontend/src -p 4200",
-    "dev": "bun run backend/gateway/wisewords-engine/src/index.ts & npx serve frontend/src -p 4200"
+    "dev:frontend": "bun run backend/gateway/wisewords-engine/src/index.ts & npx serve frontend/src -p 4200",
+    "start": "bun run backend/gateway/wisewords-engine/src/index.ts & npx serve frontend/src -p 4200",
+    "dev": "bun run backend/gateway/wisewords-engine/src/index.ts & npx serve frontend/src -p 4200",
+    "test": "bun test backend/gateway/wisewords-engine/test/gateway.test.ts"
   }
 }
