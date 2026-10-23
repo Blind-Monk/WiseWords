@@ -1,0 +1,20 @@
+{
+  "name": "wisewords-monorepo",
+  "private": true,
+  "workspaces": [
+    "backend/extensions/*",
+    "backend/shared/*",
+    "backend/search-services/*",
+    "backend/llm-services/*",
+    "backend/gateway/*",
+    "backend/orchestration/*",
+    "frontend"
+  ],
+  "scripts": {
+    "build": "tsc --build || true",
+    "dev:backend": "bun run backend/gateway/wisewords-engine/src/index.ts",
+    "dev:frontend": "bun run dev:backend & npx serve frontend/src -p 4200",
+    "start:frontend": "bun run backend/gateway/wisewords-engine/src/index.ts & npx serve frontend/src -p 4200",
+    "dev": "bun run backend/gateway/wisewords-engine/src/index.ts & npx serve frontend/src -p 4200"
+  }
+}

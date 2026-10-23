@@ -6,7 +6,7 @@ import { RagService } from '@wisewords/rag-service';
 import { McpService } from '@wisewords/mcp-service';
 import { metricsRegistry } from '@wisewords/metrics';
 
-// Import providers
+// Import LLM providers
 import { Provider_google_ai_studio } from '@wisewords/service-google-ai-studio';
 import { Provider_groq } from '@wisewords/service-groq';
 import { Provider_cerebras } from '@wisewords/service-cerebras';
@@ -22,8 +22,13 @@ import { Provider_ollama_local } from '@wisewords/service-ollama-local';
 import { Provider_openai } from '@wisewords/service-openai';
 import { Provider_anthropic } from '@wisewords/service-anthropic';
 
+// Import Search providers
 import { Provider_google_cse } from '@wisewords/service-google-cse';
+import { Provider_tavily_free } from '@wisewords/service-tavily-free';
 import { Provider_duckduckgo } from '@wisewords/service-duckduckgo';
+import { Provider_tavily_paid } from '@wisewords/service-tavily-paid';
+import { Provider_serpapi } from '@wisewords/service-serpapi';
+import { Provider_brave_paid } from '@wisewords/service-brave-paid';
 
 export function createApp() {
   const app = express();
@@ -68,8 +73,8 @@ export function createApp() {
   const llmRouter = new LlmRouter(freeLlm, paidLlm, ollama);
 
   // Instantiate Search providers
-  const freeSearch = [new Provider_google_cse()];
-  const paidSearch: any[] = [];
+  const freeSearch = [new Provider_google_cse(), new Provider_tavily_free()];
+  const paidSearch = [new Provider_tavily_paid(), new Provider_serpapi(), new Provider_brave_paid()];
   const ddg = new Provider_duckduckgo();
 
   const searchRouter = new SearchRouter(freeSearch, paidSearch, ddg);
@@ -96,6 +101,28 @@ export function createApp() {
       }
     });
   });
+
+  // Single API call listing all free and paid LLM providers and models
+  const listLlmHandler = (req: Request, res: Response) => {
+    res.json({
+      free: freeLlm.map((p) => ({ name: p.name, models: p.models })),
+      paid: paidLlm.map((p) => ({ name: p.name, models: p.models })),
+      fallback: { name: ollama.name, baseUrl: ollama.baseUrl, defaultModel: ollama.defaultModel, models: ollama.models }
+    });
+  };
+  app.get('/api/v1/list/llm', listLlmHandler);
+  app.get('/v1/list/llm', listLlmHandler);
+
+  // Single API call listing all configured free and paid search APIs
+  const listSearchHandler = (req: Request, res: Response) => {
+    res.json({
+      free: freeSearch.map((p) => ({ name: p.name })),
+      paid: paidSearch.map((p) => ({ name: p.name })),
+      fallback: { name: ddg.name }
+    });
+  };
+  app.get('/api/v1/list/searchapi', listSearchHandler);
+  app.get('/v1/list/searchapi', listSearchHandler);
 
   // GET /v1/providers/:provider/models
   app.get('/v1/providers/:provider/models', (req: Request, res: Response) => {
