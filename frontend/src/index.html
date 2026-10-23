@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Wise Words - Meta-AI Gateway</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+    .container { max-width: 900px; margin: 0 auto; background: #1e293b; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5); }
+    h1 { margin-top: 0; color: #38bdf8; display: flex; align-items: center; gap: 10px; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; color: #94a3b8; }
+    input[type="text"], textarea, select { width: 100%; box-sizing: border-box; padding: 10px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 6px; font-size: 14px; }
+    textarea { height: 100px; resize: vertical; }
+    .row { display: flex; gap: 16px; }
+    .col { flex: 1; }
+    button { background: #0284c7; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; }
+    button:hover { background: #0369a1; }
+    .card { background: #0f172a; border: 1px solid #334155; padding: 16px; border-radius: 8px; margin-top: 20px; }
+    .badge { display: inline-block; padding: 4px 8px; background: #0284c7; border-radius: 4px; font-size: 12px; font-weight: bold; }
+    .fallback-badge { background: #eab308; color: #000; }
+    .error { background: #7f1d1d; border: 1px solid #b91c1c; padding: 12px; border-radius: 6px; color: #fca5a5; margin-top: 16px; }
+    .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+    .checkbox-group input { width: auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><span>💡</span> Wise Words Meta-AI Gateway</h1>
+
+    <div class="form-group">
+      <label for="prompt">Prompt Query</label>
+      <textarea id="prompt" placeholder="Ask anything..."></textarea>
+    </div>
+
+    <div class="row">
+      <div class="col form-group">
+        <label for="llmType">LLM Type</label>
+        <select id="llmType" onchange="toggleLlmProvider()">
+          <option value="free" selected>Free (Auto Round-Robin)</option>
+          <option value="paid">Paid (Explicit Provider)</option>
+        </select>
+      </div>
+
+      <div class="col form-group" id="llmProviderGroup" style="display: none;">
+        <label for="llmProvider">Paid LLM Provider</label>
+        <select id="llmProvider">
+          <option value="openai">OpenAI</option>
+          <option value="anthropic">Anthropic</option>
+          <option value="groq-paid">Groq Paid</option>
+        </select>
+      </div>
+
+      <div class="col form-group" id="llmModelGroup" style="display: none;">
+        <label for="llmModel">Model Name</label>
+        <input type="text" id="llmModel" placeholder="e.g. gpt-4o or claude-3-5-sonnet">
+      </div>
+    </div>
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="search">
+      <label for="search" style="margin:0;">Enable Grounding Search</label>
+    </div>
+
+    <div style="margin-top: 20px;">
+      <button onclick="submitQuery()">Send Query</button>
+    </div>
+
+    <div id="errorBox" class="error" style="display: none;"></div>
+
+    <div id="responseCard" class="card" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span class="badge" id="providerBadge">Provider</span>
+        <span id="fallbackBadge" class="badge fallback-badge" style="display: none;">Fallback Used</span>
+      </div>
+      <div id="responseContent" style="white-space: pre-wrap; line-height: 1.5;"></div>
+      <div id="metadata" style="margin-top: 12px; font-size: 12px; color: #64748b;"></div>
+    </div>
+  </div>
+
+  <script>
+    function toggleLlmProvider() {
+      const type = document.getElementById('llmType').value;
+      const providerGroup = document.getElementById('llmProviderGroup');
+      const modelGroup = document.getElementById('llmModelGroup');
+      if (type === 'paid') {
+        providerGroup.style.display = 'block';
+        modelGroup.style.display = 'block';
+      } else {
+        providerGroup.style.display = 'none';
+        modelGroup.style.display = 'none';
+      }
+    }
+
+    async function submitQuery() {
+      const prompt = document.getElementById('prompt').value;
+      const llmType = document.getElementById('llmType').value;
+      const llmProvider = document.getElementById('llmProvider').value;
+      const llmModel = document.getElementById('llmModel').value;
+      const search = document.getElementById('search').checked;
+
+      const errBox = document.getElementById('errorBox');
+      const card = document.getElementById('responseCard');
+      errBox.style.display = 'none';
+      card.style.display = 'none';
+
+      if (!prompt) {
+        errBox.innerText = 'Please enter a prompt query.';
+        errBox.style.display = 'block';
+        return;
+      }
+
+      const payload = {
+        prompt,
+        llmType,
+        search
+      };
+
+      if (llmType === 'paid') {
+        payload.llmProvider = llmProvider;
+        payload.llmModel = llmModel;
+      }
+
+      try {
+        const res = await fetch('http://localhost:8080/v1/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          errBox.innerText = data.error || 'Request failed';
+          errBox.style.display = 'block';
+          return;
+        }
+
+        document.getElementById('providerBadge').innerText = `${data.provider} (${data.model})`;
+        document.getElementById('responseContent').innerText = data.content;
+        document.getElementById('metadata').innerText = `Latency: ${data.latencyMs}ms | Tokens: ${data.tokensUsed?.totalTokens || 0}`;
+
+        const fallbackBadge = document.getElementById('fallbackBadge');
+        if (data.fallback) {
+          fallbackBadge.style.display = 'inline-block';
+        } else {
+          fallbackBadge.style.display = 'none';
+        }
+
+        card.style.display = 'block';
+      } catch (err) {
+        errBox.innerText = 'Failed to connect to WiseWords Gateway backend.';
+        errBox.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
